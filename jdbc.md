@@ -375,3 +375,217 @@ public class JDBCAdvanced {
     }
 }
 ```
+
+## 8. 连接池
+### 8.1 Druid
+- 硬编码
+```java
+package com.atguigu.base.advanced.pool;
+import com.alibaba.druid.pool.DruidDataSource;
+import org.junit.Test;
+import java.sql.Connection;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/25 - 下午6:30
+ * @Version: v1.0
+ * ClassName: DruidTest
+ * Package: com.atguigu.base.advanced.pool
+ * Description: 描述
+ */
+public class DruidTest {
+
+    @Test
+    public void testDruid() throws Exception {
+        /*
+        * 硬编码：将连接池的配置信息和Java代码耦合在一起。
+        *   1. 创建DruidDataSource连接池对象
+        *   2. 设置连接池的配置信息【必须 | 非必须】
+        *   3. 通过连接池获取连接对象
+        *   4. 回收连接【不是释放连接，而是将连接归还给连接池，给其他线程进行复用】
+        * */
+
+        //  1. 创建DruidDataSource连接池对象
+        DruidDataSource druidDataSource = new DruidDataSource();
+
+        //  2. 设置连接池的配置信息【必须 | 非必须】
+        //  2.1 设置连接池的配置信息【必须】
+        druidDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        druidDataSource.setUrl("jdbc:mysql://localhost:3306/atguigu");
+        druidDataSource.setUsername("root");
+        druidDataSource.setPassword("qwert123");
+        //  2.2 设置连接池的配置信息【非必须】
+        druidDataSource.setInitialSize(10);
+        druidDataSource.setMaxActive(20);
+
+        //  3. 通过连接池获取连接对象
+        Connection connection = druidDataSource.getConnection();
+        System.out.println(connection);
+
+        //  基于connection进行CRUD
+
+        //  4. 回收连接【不是释放连接，而是将连接归还给连接池，给其他线程进行复用】
+        connection.close();
+    }
+}
+
+```
+-  软编码(推荐)：
+- 在项目目录下创建 resources 文件夹，标识该文件夹为资源目录，创建 db.properties 配置文件，将连接信息定义在该文件中。
+```properties
+  # druid连接池需要的配置参数，key固定命名
+  driverClassName=com.mysql.cj.jdbc.Driver
+  url=jdbc:mysql:///atguigu
+  username=root
+  password=atguigu
+  initialSize=10
+  maxActive=20
+```
+```java
+package com.atguigu.base.advanced.pool;
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidDataSourceFactory;
+import org.junit.Test;
+
+import javax.sql.DataSource;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.util.Properties;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/25 - 下午6:30
+ * @Version: v1.0
+ * ClassName: DruidTest
+ * Package: com.atguigu.base.advanced.pool
+ * Description: 描述
+ */
+public class DruidTest {
+    @Test
+    public void testResourcesDruid() throws Exception {
+        //1.创建Properties集合，用于存储外部配置文件的key和value值。
+        Properties properties = new Properties();
+
+        //2.读取外部配置文件，获取输入流，加载到Properties集合里。
+        InputStream inputStream = DruidTest.class.getClassLoader().getResourceAsStream("db.properties");
+        properties.load(inputStream);
+
+        //3.基于Properties集合构建DruidDataSource连接池
+        DataSource dataSource = DruidDataSourceFactory.createDataSource(properties);
+
+        //4.通过连接池获取连接对象
+        Connection connection = dataSource.getConnection();
+        System.out.println(connection);
+
+        //5.开发CRUD
+
+        //6.回收连接
+        connection.close();
+    }
+}
+```
+### 8.2 HikariCP
+- 硬编码
+```java
+package com.atguigu.base.advanced.pool;
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.Test;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/25 - 下午6:41
+ * @Version: v1.0
+ * ClassName: HikariTest
+ * Package: com.atguigu.base.advanced.pool
+ * Description: 描述
+ */
+public class HikariTest {
+    @Test
+    public void testHardCodeHikari() throws SQLException {
+          /*
+           硬编码：将连接池的配置信息和Java代码耦合在一起。
+           1、创建HikariDataSource连接池对象
+           2、设置连接池的配置信息【必须 ｜ 非必须】
+           3、通过连接池获取连接对象
+           4、回收连接
+           */
+        //1.创建HikariDataSource连接池对象
+        HikariDataSource hikariDataSource = new HikariDataSource();
+
+        //2.设置连接池的配置信息【必须 ｜ 非必须】
+        //2.1必须设置的配置
+        hikariDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        hikariDataSource.setJdbcUrl("jdbc:mysql:///atguigu");
+        hikariDataSource.setUsername("root");
+        hikariDataSource.setPassword("atguigu");
+
+        //2.2 非必须设置的配置
+        hikariDataSource.setMinimumIdle(10);
+        hikariDataSource.setMaximumPoolSize(20);
+
+        //3.通过连接池获取连接对象
+        Connection connection = hikariDataSource.getConnection();
+
+        System.out.println(connection);
+
+        //回收连接
+        connection.close();
+    }
+}
+```
+-  软编码(推荐)：
+- 在项目下创建resources/hikari.properties配置文件
+```properties
+  driverClassName=com.mysql.cj.jdbc.Driver
+  jdbcUrl=jdbc:mysql:///atguigu
+  username=root
+  password=atguigu
+  minimumIdle=10
+  maximumPoolSize=20
+  ``` 
+```java
+package com.atguigu.base.advanced.pool;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.Test;
+
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Properties;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/25 - 下午6:41
+ * @Version: v1.0
+ * ClassName: HikariTest
+ * Package: com.atguigu.base.advanced.pool
+ * Description: 描述
+ */
+public class HikariTest {
+   @Test
+   public void testResourcesHikari()throws Exception{
+      //1.创建Properties集合，用于存储外部配置文件的key和value值。
+      Properties properties = new Properties();
+
+      //2.读取外部配置文件，获取输入流，加载到Properties集合里。
+      InputStream inputStream = HikariTest.class.getClassLoader().getResourceAsStream("hikari.properties");
+      properties.load(inputStream);
+
+      // 3.创建Hikari连接池配置对象，将Properties集合传进去
+      HikariConfig hikariConfig = new HikariConfig(properties);
+
+      // 4. 基于Hikari配置对象，构建连接池
+      HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
+
+      // 5. 获取连接
+      Connection connection = hikariDataSource.getConnection();
+      System.out.println("connection = " + connection);
+
+      //6.回收连接
+      connection.close();
+   }
+}
+```
