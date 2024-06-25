@@ -105,4 +105,49 @@ public class JDBCOperation {
         connection.close();
 
     }
+
+    @Test
+    // 修改
+    public void testUpdate() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取数据库连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.创建Statement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("update t_emp set emp_salary = ? where emp_id = ?");
+        // 4.为占位符赋值，索引从1开始，编写SQL语句并执行，获取结果
+        preparedStatement.setDouble(1,888.88);
+        preparedStatement.setDouble(2,1);
+        int result = preparedStatement.executeUpdate();
+        // 5.处理结果
+        if(result>0){
+            System.out.println("修改成功");
+        }else{
+            System.out.println("修改失败");
+        }
+        // 6.释放资源(先开后关原则)
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 删除
+    public void testDelete() throws Exception {
+        // 1.注册驱动(可以省略)
+        //2.获取数据库连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        //3.创建Statement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("delete from t_emp where emp_id = ?");
+        //4.为占位符赋值，索引从1开始，编写SQL语句并执行，获取结果
+        preparedStatement.setInt(1,8);
+        int result = preparedStatement.executeUpdate();
+        //5.处理结果
+        if(result>0){
+            System.out.println("删除成功");
+        }else{
+            System.out.println("删除失败");
+        }
+        //6.释放资源(先开后关原则)
+        preparedStatement.close();
+        connection.close();
+    }
 }
