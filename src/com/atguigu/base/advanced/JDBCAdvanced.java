@@ -1,4 +1,4 @@
-package com.atguigu.base.advanced.pool;
+package com.atguigu.base.advanced;
 
 import com.atguigu.base.advanced.pojo.Employee;
 import org.junit.Test;
@@ -87,7 +87,7 @@ public class JDBCAdvanced {
     }
 
     @Test
-    //  添加对象
+    //  添加对象--主键回显
     public void testReturnPrimaryKey() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
         String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
@@ -105,7 +105,6 @@ public class JDBCAdvanced {
                 int empId = resultSet.getInt(1);
                 employee.setEmpId(empId);
             }
-
             System.out.println(employee);
         } else {
             System.out.println("插入失败");
