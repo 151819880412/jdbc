@@ -53,3 +53,325 @@
     statement.close();
     connection.close();
     ```
+## 6、基于PreparedStatement实现CRUD
+```java
+package com.atguigu.base;
+
+import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/13 - 上午9:32
+ * @Version: v1.0
+ * ClassName: JDBCOperation
+ * Package: com.atguigu.base
+ * Description: 描述
+ */
+public class JDBCOperation {
+    @Test
+    // 单行单列查询
+    public void testQuerySingleRowAndColumn() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.预编译SQL语句得到PreparedStatement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT COUNT(*) as count FROM t_emp");
+        // 4.执行SQL语句
+        ResultSet resultSet = preparedStatement.executeQuery();
+        // 5.处理结果
+        while (resultSet.next()) {
+            System.out.println(resultSet.getInt(1));
+            System.out.println(resultSet.getInt("count"));
+        }
+        // 6.释放资源
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 单行多列查询
+    public void testQuerySingleRow() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.预编译SQL语句得到PreparedStatement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT emp_id,emp_name,emp_salary,emp_age FROM t_emp WHERE emp_id = ?");
+        // 4.为占位符赋值
+        preparedStatement.setInt(1, 1);
+        // 5.执行SQL语句
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            System.out.println(resultSet.getInt("emp_id"));
+            System.out.println(resultSet.getString("emp_name"));
+            System.out.println(resultSet.getString("emp_salary"));
+            System.out.println(resultSet.getString("emp_age"));
+        }
+        // 6.释放资源
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 多行多列查询
+    public void testQueryMultiRow() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.预编译SQL语句得到PreparedStatement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT emp_id,emp_name,emp_salary,emp_age FROM t_emp WHERE emp_age > ?");
+        // 4.为占位符赋值
+        preparedStatement.setInt(1, 25);
+        // 5.执行SQL语句
+        ResultSet resultSet = preparedStatement.executeQuery();
+        while (resultSet.next()) {
+            int empId = resultSet.getInt("emp_id");
+            String empName = resultSet.getString("emp_name");
+            double empSalary = resultSet.getDouble("emp_salary");
+            int empAge = resultSet.getInt("emp_age");
+            System.out.println(empId + "\t" + empName + "\t" + empSalary + "\t" + empAge);
+        }
+        // 6.释放资源
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 新增
+    public void testInsert() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.预编译SQL语句得到PreparedStatement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO t_emp(emp_name,emp_salary,emp_age) VALUES (?,?,?)");
+        // 4.为占位符赋值
+        preparedStatement.setString(1, "张三");
+        preparedStatement.setDouble(2, 5000);
+        preparedStatement.setInt(3, 25);
+        int count = preparedStatement.executeUpdate();
+        System.out.println(count > 0 ? "成功" : "失败");
+        // 释放资源
+        preparedStatement.close();
+        connection.close();
+
+    }
+
+    @Test
+    // 修改
+    public void testUpdate() throws Exception {
+        // 1.注册驱动(可以省略)
+        // 2.获取数据库连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        // 3.创建Statement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("update t_emp set emp_salary = ? where emp_id = ?");
+        // 4.为占位符赋值，索引从1开始，编写SQL语句并执行，获取结果
+        preparedStatement.setDouble(1,888.88);
+        preparedStatement.setDouble(2,1);
+        int result = preparedStatement.executeUpdate();
+        // 5.处理结果
+        if(result>0){
+            System.out.println("修改成功");
+        }else{
+            System.out.println("修改失败");
+        }
+        // 6.释放资源(先开后关原则)
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 删除
+    public void testDelete() throws Exception {
+        // 1.注册驱动(可以省略)
+        //2.获取数据库连接
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        //3.创建Statement对象
+        PreparedStatement preparedStatement = connection.prepareStatement("delete from t_emp where emp_id = ?");
+        //4.为占位符赋值，索引从1开始，编写SQL语句并执行，获取结果
+        preparedStatement.setInt(1,8);
+        int result = preparedStatement.executeUpdate();
+        //5.处理结果
+        if(result>0){
+            System.out.println("删除成功");
+        }else{
+            System.out.println("删除失败");
+        }
+        //6.释放资源(先开后关原则)
+        preparedStatement.close();
+        connection.close();
+    }
+}
+```
+
+## 7. ORM
+```java
+package com.atguigu.base.advanced.pool;
+import com.atguigu.base.advanced.pojo.Employee;
+import org.junit.Test;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * @Author: Admin
+ * @Create: 2024/6/25 - 下午6:00
+ * @Version: v1.0
+ * ClassName: JDBCAdvanced
+ * Package: com.atguigu.base.advanced.pool
+ * Description: 描述
+ */
+public class JDBCAdvanced {
+    public JDBCAdvanced() {
+    }
+
+    @Test
+    // 查询单个对象
+    public void testORM() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        String sql = "select emp_id,emp_name,emp_salary,emp_age from t_emp where emp_id = ? ";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, 1);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Employee employee = null;
+        if (resultSet.next()) {
+            employee = new Employee();
+            int empId = resultSet.getInt("emp_id");
+            String empName = resultSet.getString("emp_name");
+            double empSalary = resultSet.getDouble("emp_salary");
+            int empAge = resultSet.getInt("emp_age");
+            System.out.println("" + empId + "\t" + empName + "\t" + empSalary + "\t" + empAge);
+            employee.setEmpId(empId);
+            employee.setEmpName(empName);
+            employee.setEmpSalary(empSalary);
+            employee.setEmpAge(empAge);
+        }
+
+        System.out.println(employee);
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 查询多个对象
+    public void testORM2() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        String sql = "select emp_id,emp_name,emp_salary,emp_age from t_emp ";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        ResultSet resultSet = preparedStatement.executeQuery();
+        Employee employee = null;
+        List<Employee> employeeList = new ArrayList();
+
+        while(resultSet.next()) {
+            employee = new Employee();
+            int empId = resultSet.getInt("emp_id");
+            String empName = resultSet.getString("emp_name");
+            double empSalary = resultSet.getDouble("emp_salary");
+            int empAge = resultSet.getInt("emp_age");
+            employee.setEmpId(empId);
+            employee.setEmpName(empName);
+            employee.setEmpSalary(empSalary);
+            employee.setEmpAge(empAge);
+            employeeList.add(employee);
+        }
+
+        Iterator var12 = employeeList.iterator();
+
+        while(var12.hasNext()) {
+            Employee emp = (Employee)var12.next();
+            System.out.println(emp);
+        }
+
+        resultSet.close();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    //  添加对象
+    public void testReturnPrimaryKey() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql, 1);
+        Employee employee = new Employee((Integer)null, "小明", 10000, 20);
+        preparedStatement.setString(1, employee.getEmpName());
+        preparedStatement.setDouble(2, employee.getEmpSalary());
+        preparedStatement.setInt(3, employee.getEmpAge());
+        int result = preparedStatement.executeUpdate();
+        ResultSet resultSet = null;
+        if (result > 0) {
+            System.out.println("插入成功");
+            resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                int empId = resultSet.getInt(1);
+                employee.setEmpId(empId);
+            }
+
+            System.out.println(employee);
+        } else {
+            System.out.println("插入失败");
+        }
+
+        preparedStatement.close();
+        connection.close();
+        if (resultSet != null) {
+            resultSet.close();
+        }
+
+    }
+
+    @Test
+    // 批量插入1
+    public void testMoreInsert() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
+        String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        long start = System.currentTimeMillis();
+
+        for(int i = 0; i < 10000; ++i) {
+            preparedStatement.setString(1, "小明批量" + i);
+            preparedStatement.setDouble(2, (double)(1 + i));
+            preparedStatement.setInt(3, 1 + i);
+            preparedStatement.executeUpdate();
+        }
+
+        long end = System.currentTimeMillis();
+        System.out.println("批量插入1000条数据,耗时:" + (end - start) + "毫秒");
+        preparedStatement.close();
+        connection.close();
+    }
+
+    @Test
+    // 批量插入2
+    public void testBatchInsert() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu?rewriteBatchedStatements=true", "root", "qwert123");
+        String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        long start = System.currentTimeMillis();
+
+        for(int i = 0; i < 10000; ++i) {
+            preparedStatement.setString(1, "小明批量" + i);
+            preparedStatement.setDouble(2, (double)(1 + i));
+            preparedStatement.setInt(3, 1 + i);
+            preparedStatement.addBatch();
+        }
+
+        preparedStatement.executeBatch();
+        long end = System.currentTimeMillis();
+        System.out.println("批量插入1000条数据,耗时:" + (end - start) + "毫秒");
+        preparedStatement.close();
+        connection.close();
+    }
+}
+```

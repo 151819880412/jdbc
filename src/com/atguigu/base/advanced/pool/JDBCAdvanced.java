@@ -24,11 +24,12 @@ public class JDBCAdvanced {
     }
 
     @Test
+    // 查询单个对象
     public void testORM() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
         String sql = "select emp_id,emp_name,emp_salary,emp_age from t_emp where emp_id = ? ";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setInt(1, 2);
+        preparedStatement.setInt(1, 1);
         ResultSet resultSet = preparedStatement.executeQuery();
         Employee employee = null;
         if (resultSet.next()) {
@@ -51,6 +52,7 @@ public class JDBCAdvanced {
     }
 
     @Test
+    // 查询多个对象
     public void testORM2() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
         String sql = "select emp_id,emp_name,emp_salary,emp_age from t_emp ";
@@ -85,6 +87,7 @@ public class JDBCAdvanced {
     }
 
     @Test
+    //  添加对象
     public void testReturnPrimaryKey() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
         String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
@@ -117,6 +120,7 @@ public class JDBCAdvanced {
     }
 
     @Test
+    // 批量插入1
     public void testMoreInsert() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "qwert123");
         String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
@@ -137,6 +141,7 @@ public class JDBCAdvanced {
     }
 
     @Test
+    // 批量插入2
     public void testBatchInsert() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu?rewriteBatchedStatements=true", "root", "qwert123");
         String sql = "insert into t_emp(emp_name,emp_salary,emp_age) values(?,?,?)";
