@@ -674,3 +674,5 @@ public class JDBCUtilTest {
     }
 }
 ```
+### 10. ThreadLocal 线程本地变量
+![img.png](ThreadLocal.png)

@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public class JDBCUtil {
     //  创建一个连接池引用,因为要提供给当前项目的全局使用,所以创建为静态的
-    static DataSource dataSource;
+    private static DataSource dataSource;
     //  在项目启动时创建连接池对象,赋值给 dataSource
     static {
         try {
