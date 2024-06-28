@@ -24,28 +24,28 @@ public interface EmployeeDao {
     * @param empId
     * @return
     * */
-    List<Employee> selectByEmpId(String empId);
+    Employee selectByEmpId(String empId);
 
     /*
     * 添加操作
     * @param employee
     * @return 受影响的行数
     * */
-    List<Employee> insert(Employee employee);
+    int insert(Employee employee);
 
     /*
     * 修改操作
     * @param employee
     * @return 受影响的行数
     * */
-    List<Employee> update(Employee employee);
+    int update(Employee employee);
 
     /*
     * 删除操作
     * @param empId
     * @return 受影响的行数
     * */
-    List<Employee> delete(String empId);
+    int delete(int empId);
 
     /*
     * 添加对象--主键回显

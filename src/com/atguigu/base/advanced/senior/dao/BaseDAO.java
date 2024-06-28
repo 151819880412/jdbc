@@ -83,7 +83,7 @@ public class BaseDAO {
             //  循环一次,代表有一行数据,通过反射创建一个对象
             T t = clazz.newInstance();
             // 循环当前行的列,循环几次就有几个列
-            for (int i = 0; i < columnCount; i++) {
+            for (int i = 1; i < columnCount; i++) {
                 // 通过下标获取列的值
                 Object value = resultSet.getObject(i);
                 //  获取到的列的 value 值,这个值就是 t 这个对象中的某一个属性
@@ -104,4 +104,15 @@ public class BaseDAO {
 
         return list;
     }
+    
+   /**
+   *  通用查询:在上面查询的集合结果中获取第一个结果,简化了获取单行单列的获取,多行多列的获取
+   * */
+   public <T> T executeQueryBean(String sql, Class<T> clazz, Object... params) throws Exception {
+       List<T> list = this.executeQuery(sql, clazz, params);
+       if(list == null || list.size() == 0){
+           return null;
+       }
+       return list.get(0);
+   }
 }
