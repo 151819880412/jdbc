@@ -1068,3 +1068,10 @@ public class JDBCUtilTest {
 
 }
 ```
+### 12. 事务
+事务的四大特性
+1. 原子性（Atomicity）
+2. 一致性（Consistency）
+3. 隔离性（Isolation）
+4. 持久性（Durability）
+在 JDBC 中，事务由 Connection 对象来管理，通过 Connection 对象的 setAutoCommit(false) 方法来开启事务，通过 Connection 对象的 commit() 方法来提交事务，通过 Connection 对象的 rollback() 方法来回滚事务。

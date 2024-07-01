@@ -1,6 +1,8 @@
 package com.atguigu.base.advanced.senior;
 
+import com.atguigu.base.advanced.senior.dao.BankDAO;
 import com.atguigu.base.advanced.senior.dao.EmployeeDao;
+import com.atguigu.base.advanced.senior.dao.impl.BankDaoImpl;
 import com.atguigu.base.advanced.senior.dao.impl.EmployeeDaoImpl;
 import com.atguigu.base.advanced.senior.pojo.Employee;
 import com.atguigu.base.advanced.senior.util.JDBCUtil;
@@ -8,6 +10,7 @@ import com.atguigu.base.advanced.senior.util.JDBCUtilV2;
 import org.junit.Test;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -111,6 +114,33 @@ public class JDBCUtilTest {
 
         //  3. 处理结果
         System.out.println(insert);
+    }
+
+    @Test
+    public void testTransaction() {
+        BankDAO bankDao = new BankDaoImpl();
+        Connection connection = null;
+        try {
+            //  1. 获取连接,将连接的事务提交改为手动提交
+             connection = JDBCUtilV2.getConnection();
+            //  2. 开启事务
+            connection.setAutoCommit(false);
+
+            //  3. 调用方法
+            bankDao.subMoney(1, 100);
+            bankDao.addMoney(2, 100);
+
+            //  4. 提交事务
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        }finally {
+            JDBCUtilV2.relese();
+        }
     }
 
 }

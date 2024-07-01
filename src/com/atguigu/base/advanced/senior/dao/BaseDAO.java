@@ -18,7 +18,7 @@ import java.util.List;
  * Package: com.atguigu.base.advanced.senior.dao
  * Description: 将公共的数据库操作封装
  */
-public class BaseDAO {
+public abstract class BaseDAO {
     /**
      * @param sql    sa
      * @param params sa
@@ -41,7 +41,11 @@ public class BaseDAO {
         int row = preparedStatement.executeUpdate();
         //  6.释放资源
         JDBCUtilV2.relese();
-        preparedStatement.close();
+        // preparedStatement.close();
+        // 优化2.
+        if(connection.getAutoCommit()){
+            preparedStatement.close();
+        }
         return row;
     }
 
@@ -100,11 +104,15 @@ public class BaseDAO {
         //  9. 释放资源
         resultSet.close();
         preparedStatement.close();
-        JDBCUtilV2.relese();
+        // JDBCUtilV2.relese();
+        // 优化2.
+        if(connection.getAutoCommit()){
+            JDBCUtilV2.relese();
+        }
 
         return list;
     }
-    
+
    /**
    *  通用查询:在上面查询的集合结果中获取第一个结果,简化了获取单行单列的获取,多行多列的获取
    * */

@@ -22,50 +22,54 @@ import java.util.Properties;
  *  注意:使用 ThreadLocal 就是为了一个线程在多次数据库操作过程中,使用的都是同一个连接
  */
 public class JDBCUtilV2 {
-    //  创建一个连接池引用,因为要提供给当前项目的全局使用,所以创建为静态的
+    //创建连接池引用，因为要提供给当前项目的全局使用，所以创建为静态的。
     private static DataSource dataSource;
-    private static ThreadLocal<Connection> threadLocal = new ThreadLocal<Connection>();
+    private static ThreadLocal<Connection> threadLocal = new ThreadLocal<>();
 
-    //  在项目启动时创建连接池对象,赋值给 dataSource
+    //在项目启动时，即创建连接池对象，赋值给dataSource
     static {
         try {
             Properties properties = new Properties();
-            InputStream inputStream = JDBCUtilV2.class.getClassLoader().getResourceAsStream("db.properties");
+            InputStream inputStream = JDBCUtil.class.getClassLoader().getResourceAsStream("db.properties");
             properties.load(inputStream);
+
             dataSource = DruidDataSourceFactory.createDataSource(properties);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-    //  2. 对外提供在连接池中获取连接的方法
-    public static Connection getConnection() {
+    //对外提供在连接池中获取连接的方法
+    public static Connection getConnection(){
         try {
-            //  从 threadLocal 中获取 Connection 连接
+            //在ThreadLocal中获取Connection、
             Connection connection = threadLocal.get();
-            // 第一次获取连接为 null,说明是第一次获取连接,需要创建连接
+            //threadLocal里没有存储Connection，也就是第一次获取
             if (connection == null) {
+                //在连接池中获取一个连接，存储在threadLocal里。
                 connection = dataSource.getConnection();
                 threadLocal.set(connection);
             }
             return connection;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
-    //  3. 对外提供在连接池中释放连接的方法
-    public static void relese() {
-        Connection connection = threadLocal.get();
+    //对外提供回收连接的方法
+    public static void relese(){
         try {
-            if (connection != null) {
-                // 从 threadLocal 中移除已经存在连接
+            Connection connection = threadLocal.get();
+            if(connection!=null){
+                //从threadLocal中移除当前已经存储的Connection对象
                 threadLocal.remove();
-                // 将 connection 归还给连接池
+                //如果开启了事务的手动提交，操作完毕后，归还给连接池之前，要将事务的自动提交改为true
+                connection.setAutoCommit(true);
+                //将Connection对象归还给连接池
                 connection.close();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
