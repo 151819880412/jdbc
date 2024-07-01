@@ -1,5 +1,4 @@
 package com.atguigu.base.advanced.senior.dao.impl;
-
 import com.atguigu.base.advanced.senior.dao.BaseDAO;
 import com.atguigu.base.advanced.senior.dao.EmployeeDao;
 import com.atguigu.base.advanced.senior.pojo.Employee;
